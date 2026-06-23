@@ -1,7 +1,22 @@
 import LoginForm from "../components/LoginForm";
 import { Sparkles } from "lucide-react";
+import { Navigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
 export default function LoginPage() {
+    const token =
+        useAuthStore(
+            (state) => state.token
+        );
+
+    if (token) {
+        return (
+            <Navigate
+                to="/chat"
+                replace
+            />
+        );
+    }
     return (
         <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/40 via-zinc-50 to-zinc-50 dark:from-indigo-900/20 dark:via-zinc-950 dark:to-zinc-950 px-4 py-12 font-sans text-zinc-900 dark:text-zinc-100">
 

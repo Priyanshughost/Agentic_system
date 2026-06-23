@@ -1,8 +1,20 @@
+import { useAuthStore } from "../../auth/store/authStore";
+
 export const streamChatMessage =
     async (
         message,
         onChunk
     ) => {
+        const token =
+            useAuthStore
+                .getState()
+                .token;
+
+        if (!token) {
+            throw new Error(
+                "Not authenticated"
+            );
+        }
 
         const response =
             await fetch(
@@ -12,6 +24,8 @@ export const streamChatMessage =
                     headers: {
                         "Content-Type":
                             "application/json",
+                        Authorization:
+                            `Bearer ${token}`,
                     },
                     body: JSON.stringify({
                         message,

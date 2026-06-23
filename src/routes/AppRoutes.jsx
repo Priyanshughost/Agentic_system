@@ -4,6 +4,10 @@ import {
     Navigate,
 } from "react-router-dom";
 
+import {
+    useAuthInit,
+} from "../features/auth/hooks/useAuthInit";
+
 import LoginPage
     from "../features/auth/pages/LoginPage";
 
@@ -17,6 +21,9 @@ import ProtectedRoute
     from "./ProtectedRoute";
 
 export default function AppRoutes() {
+
+    useAuthInit();
+
     return (
         <Routes>
             <Route

@@ -1,3 +1,4 @@
+```markdown
 # AI Chatbot Frontend
 
 A modern, responsive chatbot interface built with **React**, **Vite**, and **Tailwind CSS**. The project follows a **feature-based architecture** to keep code organized, scalable, and maintainable.
@@ -11,14 +12,16 @@ A modern, responsive chatbot interface built with **React**, **Vite**, and **Tai
 * Feature-based folder structure
 * Reusable components
 * Zustand state management
+* Authentication system
+* Login and registration flows
+* Protected routes
+* Session restoration via refresh tokens
+* HttpOnly cookie-based authentication
 * Custom hooks for chat actions
 * Streaming AI responses
 * Real-time assistant message updates
 * Backend integration through Express API
 * LangGraph-powered AI backend integration
-* Service abstraction layer
-* Ready for advanced AI workflows and tool integrations
-* Easy to scale and maintain
 
 ---
 
@@ -28,6 +31,7 @@ A modern, responsive chatbot interface built with **React**, **Vite**, and **Tai
 * Vite
 * Tailwind CSS
 * Zustand
+* React Router DOM
 * Axios
 
 ---
@@ -37,9 +41,24 @@ A modern, responsive chatbot interface built with **React**, **Vite**, and **Tai
 ```text
 src/
 ├── assets/
+│
 ├── components/
 │
 ├── features/
+│   ├── auth/
+│   │   ├── components/
+│   │   │   ├── LoginForm.jsx
+│   │   │   └── RegisterForm.jsx
+│   │   ├── hooks/
+│   │   │   └── useAuthInit.js
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   └── RegisterPage.jsx
+│   │   ├── services/
+│   │   │   └── authApi.js
+│   │   └── store/
+│   │       └── authStore.js
+│   │
 │   └── chat/
 │       ├── components/
 │       │   ├── ChatBubble.jsx
@@ -48,14 +67,19 @@ src/
 │       │   └── MessageList.jsx
 │       ├── hooks/
 │       │   └── useChatActions.js
-│       ├── store/
-│       │   └── chatStore.js
-│       └── services/
-│          └── chatApi.js
-├── hooks/
-├── utils/
+│       ├── services/
+│       │   └── chatApi.js
+│       └── store/
+│           └── chatStore.js
+│
+├── routes/
+│   ├── AppRoutes.jsx
+│   └── ProtectedRoute.jsx
+│
 ├── App.jsx
-└── main.jsx
+├── main.jsx
+└── index.css
+
 ```
 
 ---
@@ -67,30 +91,35 @@ Clone the repository:
 ```bash
 git clone <repository-url>
 cd project-name
+
 ```
 
 Install dependencies:
 
 ```bash
 npm install
+
 ```
 
 Start development server:
 
 ```bash
 npm run dev
+
 ```
 
 Build for production:
 
 ```bash
 npm run build
+
 ```
 
 Preview production build:
 
 ```bash
 npm run preview
+
 ```
 
 ---
@@ -136,7 +165,6 @@ Examples:
 * Streaming API communication
 * Express backend integration
 * LangGraph backend communication
-* Future AI provider integrations
 * Request abstraction layer
 
 ### Services
@@ -146,12 +174,55 @@ Responsible for all backend communication.
 Examples:
 
 * Express backend API
-* Future AI provider integrations
 * Request abstraction layer
 
 Keeping API logic separate from UI components improves maintainability.
 
-### Streaming Architecture
+---
+
+## Authentication Architecture
+
+The frontend uses a token-based authentication flow with automatic session restoration.
+
+```text
+Login
+    ↓
+Access Token
+    ↓
+Zustand Store
+    ↓
+Protected Routes
+
+Refresh Token
+    ↓
+HttpOnly Cookie
+    ↓
+Automatic Session Recovery
+
+```
+
+### Session Restoration Flow
+
+```text
+Application Start
+        ↓
+useAuthInit()
+        ↓
+Refresh Token Request
+        ↓
+New Access Token
+        ↓
+Get Current User
+        ↓
+Restore Session
+
+```
+
+This allows users to remain logged in across page refreshes and browser restarts without storing refresh tokens in localStorage.
+
+---
+
+## Streaming Architecture
 
 The frontend consumes Server-Sent Event style streams from the backend and updates assistant messages incrementally as chunks arrive.
 
@@ -167,12 +238,33 @@ Chunk Received
 Zustand Update
       ↓
 UI Re-render
+
 ```
 
 This enables ChatGPT-style real-time response generation instead of waiting for a complete response before rendering.
 
+---
 
-### Current Request Flow
+## Current Request Flow
+
+### Authentication Flow
+
+```text
+Login Form
+      ↓
+authApi.js
+      ↓
+Express Backend
+      ↓
+JWT Access Token
+      ↓
+Zustand Auth Store
+      ↓
+Protected Routes
+
+```
+
+### Chat Flow
 
 ```text
 ChatInput
@@ -181,7 +273,7 @@ useChatActions
     ↓
 streamChatMessage()
     ↓
-Fetch Stream
+Authenticated Fetch Request
     ↓
 Express Backend
     ↓
@@ -194,19 +286,43 @@ Zustand Store
 MessageList
     ↓
 ChatBubble
+
 ```
+
+---
+
+## Completed Milestones
+
+• Authentication system implemented
+• Login and registration flows implemented
+• Protected routes implemented
+• Session restoration implemented
+• Zustand-based auth state management
+• Streaming chat responses implemented
+• LangGraph backend integration completed
+• Real-time token streaming implemented
+• Backend communication layer completed
+
+At this point, your frontend is no longer a "chat UI". It's an authenticated AI chat client with session management and streaming support, and the README should reflect that evolution.
 
 ---
 
 ## Future Enhancements
 
+### Authentication
+
+* Profile management
+* Password reset
+* Email verification
+* Multi-device sessions
+* OAuth providers
+
 ### Chat Features
 
 * Conversation history
-* Message editing
-* Regenerate response
-* Copy message
-* Delete conversations
+* Chat persistence
+* Conversation sidebar
+* Multi-session chats
 * Search conversations
 
 ### AI Features
@@ -256,3 +372,6 @@ MIT License
 
 Built with React, Vite, Tailwind CSS, Zustand, and a streaming LangGraph-powered backend.
 
+```
+
+```

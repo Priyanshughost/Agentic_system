@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import { loginUser } from "../services/authApi";
+
+import { useAuthStore } from "../store/authStore";
 
 // PRO FIX: Defined OUTSIDE the main component so it doesn't get destroyed on every keystroke
 const InputField = ({
@@ -64,6 +69,15 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const navigate =
+        useNavigate();
+
+    const setAuth =
+        useAuthStore(
+            (state) =>
+                state.setAuth
+        );
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm((prev) => ({ ...prev, [name]: value }));
@@ -83,17 +97,41 @@ export default function LoginForm() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
 
-        setIsLoading(true);
+        e.preventDefault();
+
+        if (!validateForm())
+            return;
+
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            console.log("Login successful:", form);
-        } catch (error) {
-            setErrors({ submit: "Invalid email or password." });
-        } finally {
+
+            setIsLoading(true);
+
+            const authData =
+                await loginUser({
+                    email: form.email,
+                    password: form.password,
+                });
+
+            setAuth(authData);
+
+            navigate("/chat");
+
+        }
+        catch (error) {
+
+            setErrors((prev) => ({
+                ...prev,
+                submit:
+                    error?.response?.data?.message ||
+                    "Login failed",
+            }));
+
+        }
+        finally {
+
             setIsLoading(false);
+
         }
     };
 

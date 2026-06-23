@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { registerUser } from "../services/authApi";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
 // PRO FIX: Defined OUTSIDE the main component. 
 // Note: Since both Login and Register use this exact same component, 
@@ -67,6 +70,14 @@ export default function RegisterForm() {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const navigate =
+        useNavigate();
+
+    const setAuth =
+        useAuthStore(
+            (state) =>
+                state.setAuth
+        );
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -90,21 +101,42 @@ export default function RegisterForm() {
     };
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
-        if (!validateForm()) return;
-
-        setIsLoading(true);
+        if (!validateForm())
+            return;
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            console.log("Registration successful:", form);
-            // Handle redirect to /chat or /login here
-        } catch (error) {
-            setErrors({ submit: "Something went wrong. Please try again." });
-        } finally {
+
+            setIsLoading(true);
+
+            const authData =
+                await registerUser({
+                    name: form.name,
+                    email: form.email,
+                    password: form.password,
+                });
+
+            setAuth(authData);
+
+            navigate("/chat");
+
+        }
+        catch (error) {
+
+            setErrors((prev) => ({
+                ...prev,
+                submit:
+                    error?.response?.data?.message ||
+                    "Registration failed",
+            }));
+
+        }
+        finally {
+
             setIsLoading(false);
+
         }
     };
 

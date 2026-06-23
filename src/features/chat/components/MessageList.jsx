@@ -32,11 +32,11 @@ export default function MessageList({ messages = [] }) {
                     </div>
                 ) : (
                     /* 2. Message Mapping with proper keys */
-                    messages.map((message) => (
+                    messages.map((message, index) => (
                         <ChatBubble
                             // CRITICAL: Always use a unique ID, never the map index!
                             // Fallback to crypto.randomUUID() only if ID is missing (though your data should always have an ID)
-                            key={message.id || crypto.randomUUID()}
+                            key={index}
                             message={message}
                         />
                     ))
