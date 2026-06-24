@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
-import { registerUser, sendOtp } from "../services/authApi";
+import { registerUser, sendOtp, resendOtp } from "../services/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { useEffect } from "react";
@@ -106,6 +106,40 @@ export default function RegisterForm() {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    const handleResendOtp =
+        async () => {
+
+            try {
+
+                setIsLoading(true);
+
+                await resendOtp({
+                    name: form.name,
+                    email: form.email,
+                    password: form.password,
+                });
+
+                setCooldown(60);
+
+            }
+            catch (error) {
+
+                setErrors((prev) => ({
+                    ...prev,
+                    submit:
+                        error?.response?.data?.message ||
+                        "Failed to resend OTP",
+                }));
+
+            }
+            finally {
+
+                setIsLoading(false);
+
+            }
+
+        };
 
     const handleSendOtp =
         async () => {
@@ -214,22 +248,48 @@ export default function RegisterForm() {
             )}
 
             {otpSent ? (
-                <InputField
-                    label="OTP"
-                    name="otp"
-                    type="text"
-                    value={otp}
-                    error={errors.otp}
-                    inputMode="numeric"
-                    maxLength={6}
-                    onChange={(e) =>
-                        setOtp(
-                            e.target.value.replace(/\D/g, "")
-                        )
-                    }
-                    disabled={isLoading}
-                    placeholder="123456"
-                />
+                <>
+                    <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-600 dark:text-green-400">
+                        Verification code sent to {form.email}
+                    </div>
+                    <InputField
+                        label="OTP"
+                        name="otp"
+                        type="text"
+                        value={otp}
+                        error={errors.otp}
+                        inputMode="numeric"
+                        maxLength={6}
+                        onChange={(e) =>
+                            setOtp(
+                                e.target.value.replace(/\D/g, "")
+                            )
+                        }
+                        disabled={isLoading}
+                        placeholder="123456"
+                    />
+                    <div className="text-center text-sm">
+
+                        {cooldown > 0 ? (
+
+                            <p className="text-zinc-500">
+                                Resend OTP in {cooldown}s
+                            </p>
+
+                        ) : (
+
+                            <button
+                                type="button"
+                                onClick={handleResendOtp}
+                                className="text-indigo-600 hover:underline"
+                            >
+                                Resend OTP
+                            </button>
+
+                        )}
+
+                    </div>
+                </>
             )
                 :
                 <>
