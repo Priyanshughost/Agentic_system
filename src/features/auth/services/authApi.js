@@ -75,3 +75,16 @@ export const refreshToken =
 
         return response.data.data;
     };
+    
+export const sendOtp = async (
+    payload
+) => {
+
+    const response =
+        await api.post(
+            "/auth/send-otp",
+            payload
+        );
+
+    return response.data.data;
+};

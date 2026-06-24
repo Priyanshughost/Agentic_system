@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
-import { registerUser } from "../services/authApi";
+import { registerUser, sendOtp } from "../services/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import { useEffect } from "react";
 
 // PRO FIX: Defined OUTSIDE the main component. 
 // Note: Since both Login and Register use this exact same component, 
@@ -66,7 +67,13 @@ export default function RegisterForm() {
         password: "",
         confirmPassword: "",
     });
+    const [otpSent, setOtpSent] =
+        useState(false);
 
+    const [otp, setOtp] =
+        useState("");
+    const [cooldown, setCooldown] =
+        useState(0);
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -100,6 +107,44 @@ export default function RegisterForm() {
         return Object.keys(newErrors).length === 0;
     };
 
+    const handleSendOtp =
+        async () => {
+
+            if (!validateForm())
+                return;
+
+            try {
+
+                setIsLoading(true);
+
+                await sendOtp({
+                    name: form.name,
+                    email: form.email,
+                    password: form.password,
+                });
+
+                setOtpSent(true);
+                setCooldown(60);
+                setErrors({});
+
+            }
+            catch (error) {
+
+                setErrors((prev) => ({
+                    ...prev,
+                    submit:
+                        error?.response?.data?.message ||
+                        "Failed to send OTP",
+                }));
+
+            }
+            finally {
+
+                setIsLoading(false);
+
+            }
+        };
+
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -113,9 +158,8 @@ export default function RegisterForm() {
 
             const authData =
                 await registerUser({
-                    name: form.name,
                     email: form.email,
-                    password: form.password,
+                    otp,
                 });
 
             setAuth(authData);
@@ -140,6 +184,24 @@ export default function RegisterForm() {
         }
     };
 
+    useEffect(() => {
+
+        if (cooldown <= 0)
+            return;
+
+        const timer =
+            setInterval(() => {
+
+                setCooldown(
+                    (prev) => prev - 1
+                );
+
+            }, 1000);
+
+        return () =>
+            clearInterval(timer);
+
+    }, [cooldown]);
     return (
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
 
@@ -151,69 +213,102 @@ export default function RegisterForm() {
                 </div>
             )}
 
-            <InputField
-                label="Full Name"
-                name="name"
-                type="text"
-                value={form.name}
-                onChange={handleChange}
-                error={errors.name}
-                disabled={isLoading}
-                placeholder="John Doe"
-            />
+            {otpSent ? (
+                <InputField
+                    label="OTP"
+                    name="otp"
+                    type="text"
+                    value={otp}
+                    error={errors.otp}
+                    inputMode="numeric"
+                    maxLength={6}
+                    onChange={(e) =>
+                        setOtp(
+                            e.target.value.replace(/\D/g, "")
+                        )
+                    }
+                    disabled={isLoading}
+                    placeholder="123456"
+                />
+            )
+                :
+                <>
+                    <InputField
+                        label="Full Name"
+                        name="name"
+                        type="text"
+                        value={form.name}
+                        onChange={handleChange}
+                        error={errors.name}
+                        disabled={isLoading}
+                        placeholder="John Doe"
+                    />
 
-            <InputField
-                label="Email Address"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                error={errors.email}
-                disabled={isLoading}
-                placeholder="john@example.com"
-            />
+                    <InputField
+                        label="Email Address"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        error={errors.email}
+                        disabled={isLoading}
+                        placeholder="john@example.com"
+                    />
 
-            <InputField
-                label="Password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={handleChange}
-                error={errors.password}
-                disabled={isLoading}
-                placeholder="••••••••"
-                showPassword={showPassword}
-                onTogglePassword={() => setShowPassword(!showPassword)}
-            />
+                    <InputField
+                        label="Password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        value={form.password}
+                        onChange={handleChange}
+                        error={errors.password}
+                        disabled={isLoading}
+                        placeholder="••••••••"
+                        showPassword={showPassword}
+                        onTogglePassword={() => setShowPassword(!showPassword)}
+                    />
 
-            <InputField
-                label="Confirm Password"
-                name="confirmPassword"
-                type={showPassword ? "text" : "password"}
-                value={form.confirmPassword}
-                onChange={handleChange}
-                error={errors.confirmPassword}
-                disabled={isLoading}
-                placeholder="••••••••"
-                showPassword={showPassword}
-                // Reusing the same toggle so both fields reveal simultaneously
-                onTogglePassword={() => setShowPassword(!showPassword)}
-            />
+                    <InputField
+                        label="Confirm Password"
+                        name="confirmPassword"
+                        type={showPassword ? "text" : "password"}
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        error={errors.confirmPassword}
+                        disabled={isLoading}
+                        placeholder="••••••••"
+                        showPassword={showPassword}
+                        // Reusing the same toggle so both fields reveal simultaneously
+                        onTogglePassword={() => setShowPassword(!showPassword)}
+                    />
+                </>
+            }
 
-            <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] py-3 font-medium text-white transition-all duration-200 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100"
-            >
-                {isLoading ? (
-                    <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Creating account...
-                    </>
-                ) : (
-                    "Create Account"
-                )}
-            </button>
+            {!otpSent ? (
+                <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={
+                        isLoading ||
+                        cooldown > 0
+                    }
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] py-3 font-medium text-white transition-all duration-200 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100"
+                >
+                    {
+                        cooldown > 0
+                            ? `Resend in ${cooldown}s`
+                            : "Send OTP"
+                    }
+                </button>
+            ) : (
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] py-3 font-medium text-white transition-all duration-200 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100"
+                >
+                    Verify & Create Account
+                </button>
+            )}
         </form>
     );
 }
