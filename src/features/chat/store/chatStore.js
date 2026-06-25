@@ -3,9 +3,43 @@ import { create } from "zustand";
 export const useChatStore = create((set) => ({
     messages: [],
 
+    conversations: [],
+
+    activeConversationId: null,
+
+    setActiveConversation: (
+        conversationId
+    ) =>
+        set({
+            activeConversationId:
+                conversationId,
+        }),
+
+    setConversations: (
+        conversations
+    ) =>
+        set({
+            conversations,
+        }),
+
+    setMessages: (
+        messages
+    ) =>
+        set({
+            messages,
+        }),
+
+    clearMessages: () =>
+        set({
+            messages: [],
+        }),
+
     addMessage: (message) =>
         set((state) => ({
-            messages: [...state.messages, message],
+            messages: [
+                ...state.messages,
+                message,
+            ],
         })),
 
     createAssistantMessage: () =>
@@ -20,22 +54,50 @@ export const useChatStore = create((set) => ({
             ],
         })),
 
-    appendToLastAssistantMessage: (chunk) =>
-        set((state) => {
-            const messages = [...state.messages];
+    appendToLastAssistantMessage:
+        (chunk) =>
+            set((state) => {
 
-            const lastMessage =
-                messages[messages.length - 1];
+                const messages =
+                    [...state.messages];
 
-            if (
-                !lastMessage ||
-                lastMessage.role !== "assistant"
-            ) {
-                return state;
-            }
+                const last =
+                    messages[
+                    messages.length - 1
+                    ];
 
-            lastMessage.content += chunk;
+                if (
+                    !last ||
+                    last.role !==
+                    "assistant"
+                ) {
+                    return state;
+                }
 
-            return { messages };
+                last.content += chunk;
+
+                return {
+                    messages,
+                };
+            }),
+
+    loadConversation: (
+        messages,
+        conversationId
+    ) =>
+        set({
+            messages,
+            activeConversationId:
+                conversationId,
         }),
+
+    addConversation: (
+        conversation
+    ) =>
+        set((state) => ({
+            conversations: [
+                conversation,
+                ...state.conversations,
+            ],
+        })),
 }));

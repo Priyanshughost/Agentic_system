@@ -1,13 +1,31 @@
 import { useChatStore }
-from "../store/chatStore";
+    from "../store/chatStore";
 
 import {
     streamChatMessage,
 }
-from "../services/chatApi";
+    from "../services/chatApi";
 
 export const useChatActions =
     () => {
+
+        const addConversation =
+            useChatStore(
+                (state) =>
+                    state.addConversation
+            );
+
+        const activeConversationId =
+            useChatStore(
+                (state) =>
+                    state.activeConversationId
+            );
+
+        const setActiveConversation =
+            useChatStore(
+                (state) =>
+                    state.setActiveConversation
+            );
 
         const messages =
             useChatStore(
@@ -50,10 +68,26 @@ export const useChatActions =
 
                 await streamChatMessage(
                     text,
+                    activeConversationId,
+
+                    (conversation) => {
+
+                        setActiveConversation(
+                            conversation._id
+                        );
+
+                        addConversation(
+                            conversation
+                        );
+
+                    },
+
                     (chunk) => {
+
                         appendToLastAssistantMessage(
                             chunk
                         );
+
                     }
                 );
             };

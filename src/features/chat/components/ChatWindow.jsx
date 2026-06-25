@@ -5,6 +5,7 @@ import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import Sidebar from "./Sidebar";
 import { Menu, Bot, MoreVertical } from "lucide-react"; // Assuming you use lucide for icons
+import { useConversations } from "../hooks/useConversations";
 
 export default function ChatWindow() {
     const messages = useChatStore((state) => state.messages);
@@ -12,6 +13,8 @@ export default function ChatWindow() {
 
     // Pro touch: Handle mobile sidebar state
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    useConversations();
 
     return (
         <div className="flex h-screen w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans">

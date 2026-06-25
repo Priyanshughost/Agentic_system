@@ -1,76 +1,144 @@
-```markdown
 # AI Chatbot Frontend
 
-A modern, responsive chatbot interface built with **React**, **Vite**, and **Tailwind CSS**. The project follows a **feature-based architecture** to keep code organized, scalable, and maintainable.
+A modern, production-ready AI chatbot frontend built with **React**, **Vite**, **Tailwind CSS**, and **Zustand**.
+
+The application provides a ChatGPT-like user experience with authentication, persistent conversations, real-time streaming responses, automatic session restoration, and a scalable feature-based architecture.
+
+The frontend is designed to remain AI-provider agnostic while integrating seamlessly with a LangGraph-powered backend.
 
 ---
 
-## Features
+# Features
 
-* Modern dark-themed UI
-* Responsive layout
-* Feature-based folder structure
-* Reusable components
-* Zustand state management
-* Authentication system
-* Login and registration flows
+## Authentication
+
+* User registration
+* User login
+* JWT-based authentication
+* HttpOnly refresh token cookies
+* Automatic access token refresh
+* Session restoration after page refresh
+* Session restoration after browser restart
 * Protected routes
-* Session restoration via refresh tokens
-* HttpOnly cookie-based authentication
-* Custom hooks for chat actions
-* Streaming AI responses
-* Real-time assistant message updates
-* Backend integration through Express API
-* LangGraph-powered AI backend integration
+* Secure logout
 
 ---
 
-## Tech Stack
+## Chat
+
+* Streaming AI responses
+* Real-time token rendering
+* Conversation history
+* Conversation switching
+* New conversation creation
+* Automatic conversation creation on first message
+* Sidebar conversation list
+* Active conversation management
+* Copy assistant responses
+* Responsive chat interface
+
+---
+
+## State Management
+
+* Zustand for authentication
+* Zustand for conversations
+* Zustand for messages
+* Global conversation state
+* Active conversation tracking
+
+---
+
+## User Experience
+
+* Modern dark UI
+* Mobile responsive layout
+* Sidebar navigation
+* Loading states
+* Error handling
+* Automatic scrolling
+* Streaming assistant rendering
+* ChatGPT-inspired interface
+
+---
+
+# Tech Stack
+
+### Core
 
 * React
 * Vite
 * Tailwind CSS
-* Zustand
+
+### Routing
+
 * React Router DOM
+
+### State Management
+
+* Zustand
+
+### Networking
+
 * Axios
+* Fetch Streaming API
+
+### Authentication
+
+* JWT Access Tokens
+* HttpOnly Refresh Cookies
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
 src/
+│
 ├── assets/
 │
 ├── components/
 │
 ├── features/
+│
 │   ├── auth/
+│   │
 │   │   ├── components/
 │   │   │   ├── LoginForm.jsx
 │   │   │   └── RegisterForm.jsx
+│   │   │
 │   │   ├── hooks/
 │   │   │   └── useAuthInit.js
+│   │   │
 │   │   ├── pages/
 │   │   │   ├── LoginPage.jsx
 │   │   │   └── RegisterPage.jsx
+│   │   │
 │   │   ├── services/
 │   │   │   └── authApi.js
+│   │   │
 │   │   └── store/
 │   │       └── authStore.js
 │   │
-│   └── chat/
-│       ├── components/
-│       │   ├── ChatBubble.jsx
-│       │   ├── ChatInput.jsx
-│       │   ├── ChatWindow.jsx
-│       │   └── MessageList.jsx
-│       ├── hooks/
-│       │   └── useChatActions.js
-│       ├── services/
-│       │   └── chatApi.js
-│       └── store/
-│           └── chatStore.js
+│   ├── chat/
+│   │
+│   │   ├── components/
+│   │   │   ├── ChatBubble.jsx
+│   │   │   ├── ChatInput.jsx
+│   │   │   ├── ChatWindow.jsx
+│   │   │   ├── MessageList.jsx
+│   │   │   └── Sidebar.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useChatActions.js
+│   │   │   └── useConversations.js
+│   │   │
+│   │   ├── services/
+│   │   │   ├── chatApi.js
+│   │   │   └── conversationApi.js
+│   │   │
+│   │   └── store/
+│   │       └── chatStore.js
 │
 ├── routes/
 │   ├── AppRoutes.jsx
@@ -79,299 +147,743 @@ src/
 ├── App.jsx
 ├── main.jsx
 └── index.css
-
 ```
 
 ---
 
-## Installation
+# Installation
 
-Clone the repository:
+Clone the repository
 
 ```bash
 git clone <repository-url>
 cd project-name
-
 ```
 
-Install dependencies:
+Install dependencies
 
 ```bash
 npm install
-
 ```
 
-Start development server:
+Run the development server
 
 ```bash
 npm run dev
-
 ```
 
-Build for production:
+Create a production build
 
 ```bash
 npm run build
-
 ```
 
-Preview production build:
+Preview the production build
 
 ```bash
 npm run preview
-
 ```
 
 ---
 
-## Architecture
+# Architecture
 
-### Components
+The frontend follows a **feature-first architecture**.
 
-Contains reusable UI elements responsible for rendering the interface.
+Instead of separating code by technical layers, every feature owns its own components, services, hooks, and state.
 
-Examples:
+```text
+features/
+│
+├── auth/
+│
+└── chat/
+```
 
-* ChatBubble
-* ChatInput
-* MessageList
+Each feature remains isolated and can evolve independently.
+
+---
+
+# Components
+
+Components are responsible only for rendering UI.
+
+Examples include:
+
 * ChatWindow
+* Sidebar
+* ChatInput
+* ChatBubble
+* MessageList
+* LoginForm
+* RegisterForm
 
-### Store (Zustand)
+Business logic is intentionally kept outside UI components.
 
-Manages application state for the chat feature.
+---
+
+# Hooks
+
+Custom hooks orchestrate application behavior.
+
+Current hooks include:
+
+* useAuthInit
+* useChatActions
+* useConversations
+
+Responsibilities include:
+
+* Session initialization
+* Chat orchestration
+* Conversation loading
+* Streaming coordination
+
+---
+
+# Services
+
+Services encapsulate all backend communication.
+
+Current services include:
+
+```text
+authApi.js
+chatApi.js
+conversationApi.js
+```
 
 Responsibilities:
 
-* Messages state
-* Active conversation
-* Loading states
-* User preferences
-* Future persistence support
+* Authentication requests
+* Streaming requests
+* Conversation retrieval
+* Session restoration
+* Logout
+* Token refresh
 
-Benefits:
-
-* No Provider wrappers
-* Centralized state management
-* Selective subscriptions
-* Easy scalability
-
-### Hooks
-
-Contains custom React hooks.
-
-Examples:
-
-* Streaming API communication
-* Express backend integration
-* LangGraph backend communication
-* Request abstraction layer
-
-### Services
-
-Responsible for all backend communication.
-
-Examples:
-
-* Express backend API
-* Request abstraction layer
-
-Keeping API logic separate from UI components improves maintainability.
+Keeping networking logic outside components greatly improves maintainability.
 
 ---
 
-## Authentication Architecture
+# Zustand Stores
 
-The frontend uses a token-based authentication flow with automatic session restoration.
+The application currently maintains two independent stores.
+
+## Authentication Store
+
+Responsible for:
+
+* Current user
+* Access token
+* Authentication status
+* Session restoration
+
+---
+
+## Chat Store
+
+Responsible for:
+
+* Messages
+* Conversations
+* Active conversation
+* Streaming updates
+* Conversation switching
+
+This separation keeps authentication completely independent from chat state.
+
+---
+
+# Current Frontend Responsibilities
+
+The frontend is responsible for:
+
+* User authentication
+* Session restoration
+* Route protection
+* Conversation management
+* Streaming response rendering
+* Message state
+* Sidebar synchronization
+* Chat interface rendering
+* Backend communication
+
+The AI reasoning itself is intentionally delegated to the backend, keeping the frontend focused on user experience and application state.
+# Authentication Architecture
+
+The frontend implements a JWT-based authentication system using **short-lived access tokens** and **HttpOnly refresh token cookies**.
+
+This architecture keeps sensitive credentials out of local storage while allowing seamless session restoration.
+
+---
+
+## Authentication Flow
 
 ```text
-Login
-    ↓
+Register / Login
+        │
+        ▼
+Express Backend
+        │
+        ▼
 Access Token
-    ↓
-Zustand Store
-    ↓
+        │
+        ▼
+Zustand Auth Store
+        │
+        ▼
 Protected Routes
 
 Refresh Token
-    ↓
+        │
+        ▼
 HttpOnly Cookie
-    ↓
+        │
+        ▼
 Automatic Session Recovery
-
 ```
-
-### Session Restoration Flow
-
-```text
-Application Start
-        ↓
-useAuthInit()
-        ↓
-Refresh Token Request
-        ↓
-New Access Token
-        ↓
-Get Current User
-        ↓
-Restore Session
-
-```
-
-This allows users to remain logged in across page refreshes and browser restarts without storing refresh tokens in localStorage.
 
 ---
 
-## Streaming Architecture
+## Session Restoration
 
-The frontend consumes Server-Sent Event style streams from the backend and updates assistant messages incrementally as chunks arrive.
+Unlike traditional applications that persist access tokens in localStorage, this application restores the session using the backend.
 
-Flow:
+Application startup flow:
+
+```text
+Application Starts
+        │
+        ▼
+useAuthInit()
+        │
+        ▼
+POST /auth/refresh
+        │
+        ▼
+New Access Token
+        │
+        ▼
+GET /auth/me
+        │
+        ▼
+Restore User
+        │
+        ▼
+Render Protected Routes
+```
+
+This allows users to:
+
+* Refresh the browser
+* Close and reopen the browser
+* Continue their previous session
+
+without exposing refresh tokens to JavaScript.
+
+---
+
+# Conversation Architecture
+
+Every conversation is represented independently.
+
+The frontend keeps track of:
+
+* Conversation list
+* Active conversation
+* Messages belonging to the active conversation
+
+The backend remains the source of truth while Zustand provides fast client-side state management.
+
+---
+
+## Conversation Lifecycle
+
+```text
+Click "New Chat"
+        │
+        ▼
+Clear Current Messages
+        │
+        ▼
+activeConversation = null
+        │
+        ▼
+User sends first message
+        │
+        ▼
+Backend creates Conversation
+        │
+        ▼
+Conversation streamed back
+        │
+        ▼
+Conversation added to Sidebar
+        │
+        ▼
+Future messages reuse Conversation ID
+```
+
+A conversation is therefore created **only when the first message is sent**, avoiding empty conversations in the database.
+
+---
+
+## Conversation Switching
+
+When a conversation is selected from the sidebar:
+
+```text
+Sidebar
+      │
+      ▼
+GET /conversations/:id
+      │
+      ▼
+Load Messages
+      │
+      ▼
+Update Zustand
+      │
+      ▼
+Render Conversation
+```
+
+Conversation switching never reloads the application.
+
+Only the relevant messages are fetched.
+
+---
+
+# Streaming Architecture
+
+Assistant responses are streamed token-by-token from the backend.
 
 ```text
 User Message
-      ↓
-Backend Stream
-      ↓
-Chunk Received
-      ↓
-Zustand Update
-      ↓
-UI Re-render
-
+      │
+      ▼
+Authenticated Fetch Request
+      │
+      ▼
+Express Backend
+      │
+      ▼
+LangGraph Stream
+      │
+      ▼
+Server-Sent Events
+      │
+      ▼
+Streaming Chunks
+      │
+      ▼
+appendToLastAssistantMessage()
+      │
+      ▼
+Live UI Update
 ```
 
-This enables ChatGPT-style real-time response generation instead of waiting for a complete response before rendering.
+The assistant message is created immediately as an empty placeholder.
+
+Each incoming chunk is appended incrementally, producing a ChatGPT-like typing experience.
 
 ---
 
-## Current Request Flow
+# Request Flow
 
-### Authentication Flow
+## Authentication
 
 ```text
 Login Form
-      ↓
+      │
+      ▼
 authApi.js
-      ↓
+      │
+      ▼
 Express Backend
-      ↓
+      │
+      ▼
 JWT Access Token
-      ↓
-Zustand Auth Store
-      ↓
+      │
+      ▼
+Auth Store
+      │
+      ▼
 Protected Routes
-
 ```
 
-### Chat Flow
+---
+
+## Sending a Message
 
 ```text
 ChatInput
-    ↓
-useChatActions
-    ↓
-streamChatMessage()
-    ↓
+      │
+      ▼
+useChatActions()
+      │
+      ▼
+chatApi.streamChatMessage()
+      │
+      ▼
 Authenticated Fetch Request
-    ↓
+      │
+      ▼
 Express Backend
-    ↓
+      │
+      ▼
+Conversation Creation (if needed)
+      │
+      ▼
 LangGraph Stream
-    ↓
+      │
+      ▼
 Streaming Chunks
-    ↓
-Zustand Store
-    ↓
+      │
+      ▼
+Zustand Chat Store
+      │
+      ▼
 MessageList
-    ↓
+      │
+      ▼
 ChatBubble
-
 ```
 
 ---
 
-## Completed Milestones
+## Loading Conversations
 
-• Authentication system implemented
-• Login and registration flows implemented
-• Protected routes implemented
-• Session restoration implemented
-• Zustand-based auth state management
-• Streaming chat responses implemented
-• LangGraph backend integration completed
-• Real-time token streaming implemented
-• Backend communication layer completed
-
-At this point, your frontend is no longer a "chat UI". It's an authenticated AI chat client with session management and streaming support, and the README should reflect that evolution.
+```text
+ChatWindow Mount
+        │
+        ▼
+useConversations()
+        │
+        ▼
+conversationApi.js
+        │
+        ▼
+GET /conversations
+        │
+        ▼
+Conversation List
+        │
+        ▼
+Sidebar
+```
 
 ---
 
-## Future Enhancements
+## Loading Conversation Messages
 
-### Authentication
+```text
+Sidebar Click
+      │
+      ▼
+GET /conversations/:id
+      │
+      ▼
+Messages Returned
+      │
+      ▼
+loadConversation()
+      │
+      ▼
+Update Chat Store
+      │
+      ▼
+Render Messages
+```
 
-* Profile management
-* Password reset
+---
+
+# Current Frontend Data Flow
+
+```text
+User
+ │
+ ▼
+React Components
+ │
+ ▼
+Custom Hooks
+ │
+ ▼
+API Services
+ │
+ ▼
+Express Backend
+ │
+ ▼
+LangGraph
+ │
+ ▼
+Streaming Response
+ │
+ ▼
+Zustand Store
+ │
+ ▼
+React Components
+ │
+ ▼
+UI
+```
+
+The UI never communicates directly with the backend.
+
+Every request passes through a dedicated service layer, while application state is coordinated through Zustand.
+# Completed Milestones
+
+The project has evolved from a simple chatbot interface into a fully authenticated AI chat application with persistent conversations and streaming responses.
+
+Current completed functionality includes:
+
+## Authentication
+
+* User registration
+* User login
+* JWT access token authentication
+* HttpOnly refresh token authentication
+* Automatic access token refresh
+* Session restoration
+* Protected routes
+* Secure logout
+
+---
+
+## Conversation Management
+
+* Automatic conversation creation
+* Conversation sidebar
+* Conversation persistence
+* Active conversation management
+* Conversation switching
+* Conversation history retrieval
+* New chat workflow
+
+---
+
+## Messaging
+
+* Persistent message storage
+* Streaming AI responses
+* Incremental assistant rendering
+* Copy assistant responses
+* Automatic scrolling
+* Real-time UI updates
+
+---
+
+## State Management
+
+* Zustand authentication store
+* Zustand chat store
+* Conversation synchronization
+* Active conversation synchronization
+* Session synchronization
+
+---
+
+## Backend Integration
+
+* Authentication API integration
+* Streaming chat API integration
+* Conversation API integration
+* Automatic session restoration
+* Secure authenticated requests
+
+---
+
+## User Interface
+
+* Responsive layout
+* Mobile sidebar
+* Dark theme
+* ChatGPT-inspired interface
+* Modern component design
+* Reusable UI architecture
+
+---
+
+At this stage, the frontend is no longer just a chat interface.
+
+It has become a fully authenticated AI client capable of managing users, conversations, and streaming interactions with an AI backend.
+
+---
+
+# Future Roadmap
+
+The architecture has intentionally been designed to support future capabilities without major refactoring.
+
+## Authentication
+
 * Email verification
+* Password reset
+* Profile management
 * Multi-device sessions
 * OAuth providers
+* Two-factor authentication
 
-### Chat Features
+---
 
-* Conversation history
-* Chat persistence
-* Conversation sidebar
-* Multi-session chats
-* Search conversations
+## Conversations
 
-### AI Features
+* Rename conversation
+* Delete conversation
+* Pin conversations
+* Archive conversations
+* Conversation search
+* Infinite scrolling history
 
-* Streaming responses
-* Multi-model support
+---
+
+## Messaging
+
+* Markdown rendering
+* Syntax highlighting
+* Message editing
+* Regenerate responses
+* Delete individual messages
+* Message reactions
+* Message timestamps
+* Export conversations
+
+---
+
+## AI Features
+
 * File uploads
+* Image understanding
 * Image generation
 * Voice input
-* Function calling
+* Voice responses
+* Tool calling
+* Web search
+* Code execution
+* Multi-model support
+* Agent selection
+* Reasoning mode
+* Model switching
 
-### UI Improvements
+---
 
-* Framer Motion animations
-* Glassmorphism effects
-* Mobile drawer navigation
+## User Experience
+
+* Typing indicators
+* Better loading animations
+* Keyboard shortcuts
+* Drag-and-drop uploads
 * Theme switching
-* Markdown rendering
-* Code syntax highlighting
+* Accessibility improvements
+* Framer Motion page transitions
+* Offline detection
+* Toast notifications
 
-### Developer Experience
+---
+
+## Developer Experience
 
 * TypeScript migration
+* ESLint
+* Prettier
 * Unit testing
-* E2E testing
-* ESLint + Prettier
+* Integration testing
+* End-to-end testing
 * CI/CD pipeline
+* Docker support
+* Storybook
+* Environment validation
 
 ---
 
-## Design Principles
+# Design Principles
 
-* Feature-first architecture
-* Separation of concerns
-* Reusable UI components
-* Scalable folder organization
-* Easy API integration
-* Production-ready codebase structure
+The frontend is built around a small set of architectural principles.
+
+## Feature-First Organization
+
+Every feature owns its own:
+
+* Components
+* Hooks
+* Services
+* State
+
+This minimizes coupling and keeps features easy to extend.
 
 ---
 
-## License
+## Separation of Concerns
+
+Responsibilities are clearly divided.
+
+Components
+
+* Render UI
+
+Hooks
+
+* Coordinate feature logic
+
+Services
+
+* Communicate with the backend
+
+Stores
+
+* Manage application state
+
+---
+
+## Scalability
+
+The project favors scalable abstractions over short-term convenience.
+
+Examples include:
+
+* Dedicated API layer
+* Independent authentication store
+* Independent chat store
+* Feature-based architecture
+* AI-provider agnostic design
+
+---
+
+## Maintainability
+
+Business logic remains outside UI components whenever possible.
+
+This results in:
+
+* Easier testing
+* Easier debugging
+* Better code reuse
+* Smaller components
+
+---
+
+## User Experience First
+
+The application prioritizes perceived responsiveness.
+
+Examples include:
+
+* Streaming responses
+* Automatic scrolling
+* Immediate placeholder messages
+* Session restoration
+* Responsive layouts
+* Minimal loading interruptions
+
+---
+
+# License
 
 MIT License
 
 ---
 
-Built with React, Vite, Tailwind CSS, Zustand, and a streaming LangGraph-powered backend.
-
-```
-
-```
+Built with **React**, **Vite**, **Tailwind CSS**, **Zustand**, and an authenticated streaming backend powered by **LangGraph**.

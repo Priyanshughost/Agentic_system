@@ -5,7 +5,6 @@ import { BotMessageSquare } from "lucide-react"; // Assuming lucide-react for co
 export default function MessageList({ messages = [] }) {
     // Reference to the bottom of the list for auto-scrolling
     const messagesEndRef = useRef(null);
-
     // Auto-scroll logic: triggers whenever the 'messages' array changes
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,11 +31,11 @@ export default function MessageList({ messages = [] }) {
                     </div>
                 ) : (
                     /* 2. Message Mapping with proper keys */
-                    messages.map((message, index) => (
+                    messages.map((message) => (
                         <ChatBubble
                             // CRITICAL: Always use a unique ID, never the map index!
                             // Fallback to crypto.randomUUID() only if ID is missing (though your data should always have an ID)
-                            key={index}
+                            key={message._id || message.id}
                             message={message}
                         />
                     ))

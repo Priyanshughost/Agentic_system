@@ -3,6 +3,8 @@ import { useAuthStore } from "../../auth/store/authStore";
 export const streamChatMessage =
     async (
         message,
+        conversationId,
+        onConversationCreated,
         onChunk
     ) => {
         const token =
@@ -29,6 +31,7 @@ export const streamChatMessage =
                     },
                     body: JSON.stringify({
                         message,
+                        conversationId,
                     }),
                 }
             );
@@ -61,6 +64,7 @@ export const streamChatMessage =
                     );
 
             for (const line of lines) {
+
                 const data =
                     JSON.parse(
                         line.replace(
@@ -69,11 +73,23 @@ export const streamChatMessage =
                         )
                     );
 
+                if (
+                    data.conversation
+                ) {
+                    onConversationCreated(
+                        data.conversation
+                    );
+
+                    continue;
+                }
+
                 if (data.done) {
                     return;
                 }
 
-                onChunk(data.content);
+                onChunk(
+                    data.content
+                );
             }
         }
     };
