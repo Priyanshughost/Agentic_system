@@ -48,3 +48,42 @@ export const getConversationMessages =
 
         return response.data.data;
     };
+export const renameConversation = async (
+    conversationId,
+    title
+) => {
+
+    const token =
+        useAuthStore.getState().token;
+
+    const response =
+        await api.patch(
+            `/conversations/${conversationId}`,
+            { title },
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`,
+                },
+            }
+        );
+
+    return response.data.data;
+};
+export const deleteConversation =
+    async (conversationId) => {
+
+        const token =
+            useAuthStore.getState().token;
+
+        await api.delete(
+            `/conversations/${conversationId}`,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`,
+                },
+            }
+        );
+
+    };

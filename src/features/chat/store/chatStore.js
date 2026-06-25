@@ -100,4 +100,44 @@ export const useChatStore = create((set) => ({
                 ...state.conversations,
             ],
         })),
+    renameConversation: (
+        conversationId,
+        title
+    ) =>
+        set((state) => ({
+            conversations:
+                state.conversations.map((conversation) =>
+                    conversation._id === conversationId
+                        ? {
+                            ...conversation,
+                            title,
+                        }
+                        : conversation
+                ),
+        })),
+    deleteConversation: (
+        conversationId
+    ) =>
+        set((state) => ({
+
+            conversations:
+                state.conversations.filter(
+                    conversation =>
+                        conversation._id !==
+                        conversationId
+                ),
+
+            activeConversationId:
+                state.activeConversationId ===
+                    conversationId
+                    ? null
+                    : state.activeConversationId,
+
+            messages:
+                state.activeConversationId ===
+                    conversationId
+                    ? []
+                    : state.messages,
+
+        })),
 }));

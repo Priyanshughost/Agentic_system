@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../auth/services/authApi";
 import { useChatStore } from "../store/chatStore";
 import { getConversationMessages } from "../services/conversationApi";
+import ConversationItem from "./ConversationItem";
 
 export default function Sidebar({ onClose }) {
     const navigate = useNavigate();
@@ -135,26 +136,11 @@ export default function Sidebar({ onClose }) {
                 </div>
                 <div className="space-y-0.5 flex flex-col">
                     {conversations.map((conversation) => (
-                        <button
+                        <ConversationItem
                             key={conversation._id}
-                            onClick={() =>
-                                handleConversationClick(
-                                    conversation._id
-                                )
-                            }
-                            className={`flex items-center gap-3 w-full rounded-lg px-2.5 py-2 text-sm text-left transition-colors truncate
-
-                                ${activeConversationId ===
-                                    conversation._id
-                                    ? "bg-zinc-200/50 dark:bg-zinc-800/50 font-medium text-zinc-900 dark:text-zinc-100"
-                                    : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400"
-                                }`}
-                        >
-                            <MessageSquare className="w-4 h-4 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" />
-                            <span className="truncate pr-2">
-                                {conversation.title || "New Conversation"}
-                            </span>
-                        </button>
+                            conversation={conversation}
+                            onClose={onClose}
+                        />
                     ))}
                 </div>
             </div>
