@@ -1,1 +1,39 @@
 @import "tailwindcss";
+
+/* index.css */
+@layer utilities {
+    .scrollbar-hide {
+        /* IE and Edge */
+        -ms-overflow-style: none;
+        /* Firefox */
+        scrollbar-width: none;
+    }
+
+    /* Safari and Chrome */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+pre {
+    overflow-x: auto;
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+code {
+    font-family:
+        "JetBrains Mono",
+        "Fira Code",
+        monospace;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid rgb(63 63 70);
+}

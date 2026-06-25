@@ -69,7 +69,7 @@ export default function ChatWindow() {
                 </header>
 
                 {/* Message List Container - Restricted overflow to prevent whole-page scrolling */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth">
+                <div className="flex-1 overflow-y-auto scrollbar-hide overflow-x-hidden relative scroll-smooth">
                     <MessageList messages={messages} />
                 </div>
 
