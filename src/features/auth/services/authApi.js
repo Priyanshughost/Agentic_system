@@ -1,11 +1,5 @@
 import axios from "axios";
-
-const api = axios.create({
-    baseURL:
-        import.meta.env.VITE_API_URL,
-
-    withCredentials: true,
-});
+import api from "../../../lib/api";
 
 export const registerUser = async (
     payload
@@ -37,15 +31,7 @@ export const getCurrentUser =
     async (token) => {
 
         const response =
-            await api.get(
-                "/auth/me",
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
-                }
-            );
+            await api.get("/auth/me");
 
         return response.data.data;
     };
@@ -53,25 +39,14 @@ export const getCurrentUser =
 export const logoutUser =
     async (token) => {
 
-        await api.post(
-            "/auth/logout",
-            {},
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`,
-                },
-            }
-        );
+        await api.post("/auth/logout", {});
     };
 
 export const refreshToken =
     async () => {
 
         const response =
-            await api.post(
-                "/auth/refresh"
-            );
+            await api.post("/auth/refresh");
 
         return response.data.data;
     };

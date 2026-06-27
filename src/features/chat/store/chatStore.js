@@ -2,29 +2,34 @@ import { create } from "zustand";
 
 export const useChatStore = create((set) => ({
     messages: [],
-
     conversations: [],
-
     activeConversationId: null,
 
-    setActiveConversation: (
-        conversationId
-    ) =>
-        set({
-            activeConversationId:
-                conversationId,
+    // NEW: Track the active network stream
+    activeStreamController: null,
+
+    setActiveStreamController: (controller) =>
+        set({ activeStreamController: controller }),
+
+    abortActiveStream: () =>
+        set((state) => {
+            if (state.activeStreamController) {
+                state.activeStreamController.abort();
+            }
+            return { activeStreamController: null };
         }),
 
-    setConversations: (
-        conversations
-    ) =>
+    setActiveConversation: (conversationId) =>
+        set({
+            activeConversationId: conversationId,
+        }),
+
+    setConversations: (conversations) =>
         set({
             conversations,
         }),
 
-    setMessages: (
-        messages
-    ) =>
+    setMessages: (messages) =>
         set({
             messages,
         }),
@@ -42,102 +47,87 @@ export const useChatStore = create((set) => ({
             ],
         })),
 
+    // Update 1: Add a default status when creating the message
     createAssistantMessage: () =>
         set((state) => ({
             messages: [
                 ...state.messages,
                 {
-                    id: Date.now(),
+                    id: crypto.randomUUID(),
                     role: "assistant",
                     content: "",
+                    status: "Thinking...", // NEW
                 },
             ],
         })),
 
-    appendToLastAssistantMessage:
-        (chunk) =>
-            set((state) => {
+    // Update 2: Add this brand new function to update the status text
+    updateAssistantStatus: (statusText) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = messages[messages.length - 1];
 
-                const messages =
-                    [...state.messages];
+            if (!last || last.role !== "assistant") return state;
 
-                const last =
-                    messages[
-                    messages.length - 1
-                    ];
-
-                if (
-                    !last ||
-                    last.role !==
-                    "assistant"
-                ) {
-                    return state;
-                }
-
-                last.content += chunk;
-
-                return {
-                    messages,
-                };
-            }),
-
-    loadConversation: (
-        messages,
-        conversationId
-    ) =>
-        set({
-            messages,
-            activeConversationId:
-                conversationId,
+            last.status = statusText;
+            return { messages };
         }),
 
-    addConversation: (
-        conversation
-    ) =>
+    // Update 3: Modify append to clear the status once text arrives
+    appendToLastAssistantMessage: (chunk) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = messages[messages.length - 1];
+
+            if (!last || last.role !== "assistant") {
+                return state;
+            }
+
+            last.content += chunk;
+
+            // NEW: The moment actual text arrives, kill the status
+            if (last.status) {
+                last.status = null;
+            }
+
+            return { messages };
+        }),
+
+    loadConversation: (messages, conversationId) =>
+        set({
+            messages,
+            activeConversationId: conversationId,
+        }),
+
+    addConversation: (conversation) =>
         set((state) => ({
             conversations: [
                 conversation,
                 ...state.conversations,
             ],
         })),
-    renameConversation: (
-        conversationId,
-        title
-    ) =>
+
+    renameConversation: (conversationId, title) =>
         set((state) => ({
-            conversations:
-                state.conversations.map((conversation) =>
-                    conversation._id === conversationId
-                        ? {
-                            ...conversation,
-                            title,
-                        }
-                        : conversation
-                ),
+            conversations: state.conversations.map((conversation) =>
+                conversation._id === conversationId
+                    ? { ...conversation, title }
+                    : conversation
+            ),
         })),
-    deleteConversation: (
-        conversationId
-    ) =>
+
+    deleteConversation: (conversationId) =>
         set((state) => ({
-
-            conversations:
-                state.conversations.filter(
-                    conversation =>
-                        conversation._id !==
-                        conversationId
-                ),
-
+            conversations: state.conversations.filter(
+                (conversation) => conversation._id !== conversationId
+            ),
             activeConversationId:
-                state.activeConversationId ===
-                    conversationId
+                state.activeConversationId === conversationId
                     ? null
                     : state.activeConversationId,
-
             messages:
-                state.activeConversationId ===
-                    conversationId
+                state.activeConversationId === conversationId
                     ? []
                     : state.messages,
-
         })),
 }));

@@ -1,10 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "../../auth/store/authStore";
-
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true,
-});
+import api from "../../../lib/api";
 
 export const getConversations = async () => {
 
@@ -14,15 +10,7 @@ export const getConversations = async () => {
             .token;
 
     const response =
-        await api.get(
-            "/conversations",
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`,
-                },
-            }
-        );
+        await api.get("/conversations");
 
     return response.data.data;
 };
@@ -36,15 +24,7 @@ export const getConversationMessages =
                 .token;
 
         const response =
-            await api.get(
-                `/conversations/${conversationId}`,
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
-                }
-            );
+            await api.get(`/conversations/${conversationId}`);
 
         return response.data.data;
     };
@@ -57,16 +37,7 @@ export const renameConversation = async (
         useAuthStore.getState().token;
 
     const response =
-        await api.patch(
-            `/conversations/${conversationId}`,
-            { title },
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`,
-                },
-            }
-        );
+        await api.patch(`/conversations/${conversationId}`, { title });
 
     return response.data.data;
 };
@@ -76,14 +47,6 @@ export const deleteConversation =
         const token =
             useAuthStore.getState().token;
 
-        await api.delete(
-            `/conversations/${conversationId}`,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`,
-                },
-            }
-        );
+        await api.delete(`/conversations/${conversationId}`);
 
     };

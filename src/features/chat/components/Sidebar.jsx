@@ -17,74 +17,39 @@ import ConversationItem from "./ConversationItem";
 export default function Sidebar({ onClose }) {
     const navigate = useNavigate();
 
-    const loadConversation =
-        useChatStore(
-            (state) =>
-                state.loadConversation
-        );
-
-    const activeConversationId =
-        useChatStore(
-            (state) =>
-                state.activeConversationId
-        );
-    // Zustand selectors (kept separate to prevent unnecessary re-renders)
+    const loadConversation = useChatStore((state) => state.loadConversation);
+    const activeConversationId = useChatStore((state) => state.activeConversationId);
     const conversations = useChatStore((state) => state.conversations);
     const token = useAuthStore((state) => state.token);
     const logout = useAuthStore((state) => state.logout);
     const user = useAuthStore((state) => state.user);
-    const clearMessages =
-        useChatStore(
-            (state) =>
-                state.clearMessages
-        );
+    const clearMessages = useChatStore((state) => state.clearMessages);
+    const setActiveConversation = useChatStore((state) => state.setActiveConversation);
 
-    const setActiveConversation =
-        useChatStore(
-            (state) =>
-                state.setActiveConversation
-        );
+    // NEW: Grab the abort function
+    const abortActiveStream = useChatStore((state) => state.abortActiveStream);
 
-    const handleNewChat =
-        () => {
+    const handleNewChat = () => {
+        abortActiveStream(); // KILL ON NEW CHAT
+        clearMessages();
+        setActiveConversation(null);
+        onClose?.();
+    };
 
-            clearMessages();
+    const handleConversationClick = async (conversationId) => {
+        // Prevent reloading if they click the conversation they are already viewing
+        if (activeConversationId === conversationId) return;
 
-            setActiveConversation(
-                null
-            );
+        abortActiveStream(); // KILL ON SWITCHING CHAT
 
+        try {
+            const messages = await getConversationMessages(conversationId);
+            loadConversation(messages, conversationId);
             onClose?.();
-        };
-
-    const handleConversationClick =
-        async (
-            conversationId
-        ) => {
-
-            try {
-
-                const messages =
-                    await getConversationMessages(
-                        conversationId
-                    );
-
-                loadConversation(
-                    messages,
-                    conversationId
-                );
-
-                onClose?.();
-
-            }
-            catch (error) {
-
-                console.error(
-                    error
-                );
-
-            }
-        };
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleLogout = async () => {
         try {

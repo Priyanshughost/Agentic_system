@@ -1,99 +1,77 @@
-import { useChatStore }
-    from "../store/chatStore";
+import { useChatStore } from "../store/chatStore";
+import { streamChatMessage } from "../services/chatApi";
 
-import {
-    streamChatMessage,
-}
-    from "../services/chatApi";
+export const useChatActions = () => {
+    const addConversation = useChatStore((state) => state.addConversation);
+    const activeConversationId = useChatStore((state) => state.activeConversationId);
+    const setActiveConversation = useChatStore((state) => state.setActiveConversation);
+    const messages = useChatStore((state) => state.messages);
+    const addMessage = useChatStore((state) => state.addMessage);
+    const createAssistantMessage = useChatStore((state) => state.createAssistantMessage);
+    const appendToLastAssistantMessage = useChatStore((state) => state.appendToLastAssistantMessage);
 
-export const useChatActions =
-    () => {
+    // NEW: Grab the status updater
+    const updateAssistantStatus = useChatStore((state) => state.updateAssistantStatus);
 
-        const addConversation =
-            useChatStore(
-                (state) =>
-                    state.addConversation
-            );
+    const setActiveStreamController = useChatStore((state) => state.setActiveStreamController);
+    const abortActiveStream = useChatStore((state) => state.abortActiveStream);
 
-        const activeConversationId =
-            useChatStore(
-                (state) =>
-                    state.activeConversationId
-            );
+    const sendMessage = async (text) => {
+        if (!text.trim()) return;
 
-        const setActiveConversation =
-            useChatStore(
-                (state) =>
-                    state.setActiveConversation
-            );
+        abortActiveStream();
 
-        const messages =
-            useChatStore(
-                (state) =>
-                    state.messages
-            );
+        const controller = new AbortController();
+        setActiveStreamController(controller);
 
-        const addMessage =
-            useChatStore(
-                (state) =>
-                    state.addMessage
-            );
+        addMessage({
+            id: Date.now(),
+            role: "user",
+            content: text,
+        });
 
-        const createAssistantMessage =
-            useChatStore(
-                (state) =>
-                    state.createAssistantMessage
-            );
+        createAssistantMessage();
 
-        const appendToLastAssistantMessage =
-            useChatStore(
-                (state) =>
-                    state
-                        .appendToLastAssistantMessage
-            );
+        let thisStreamConversationId = activeConversationId;
 
-        const sendMessage =
-            async (text) => {
-
-                if (!text.trim())
-                    return;
-
-                addMessage({
-                    id: Date.now(),
-                    role: "user",
-                    content: text,
-                });
-
-                createAssistantMessage();
-
-                await streamChatMessage(
-                    text,
-                    activeConversationId,
-
-                    (conversation) => {
-
-                        setActiveConversation(
-                            conversation._id
-                        );
-
-                        addConversation(
-                            conversation
-                        );
-
-                    },
-
-                    (chunk) => {
-
-                        appendToLastAssistantMessage(
-                            chunk
-                        );
-
+        try {
+            await streamChatMessage(
+                text,
+                activeConversationId,
+                (conversation) => {
+                    thisStreamConversationId = conversation._id;
+                    setActiveConversation(conversation._id);
+                    addConversation(conversation);
+                },
+                (chunk) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        appendToLastAssistantMessage(chunk);
+                    } else {
+                        controller.abort();
                     }
-                );
-            };
-
-        return {
-            messages,
-            sendMessage,
-        };
+                },
+                // NEW: Status callback with the same firewall protection
+                (statusText) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        updateAssistantStatus(statusText);
+                    }
+                },
+                controller.signal
+            );
+        } catch (error) {
+            if (error.name === 'AbortError' || error.name === 'CanceledError') {
+                console.log('Stream successfully blocked and aborted.');
+            } else {
+                console.error("Stream error:", error);
+            }
+        } finally {
+            if (useChatStore.getState().activeStreamController === controller) {
+                setActiveStreamController(null);
+            }
+        }
     };
+
+    return { messages, sendMessage };
+};

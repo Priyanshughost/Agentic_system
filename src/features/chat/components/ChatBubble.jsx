@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, User, Copy, Check } from "lucide-react";
+import { Copy, Check, Loader2 } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 
 export default function ChatBubble({ message }) {
@@ -13,17 +13,16 @@ export default function ChatBubble({ message }) {
     };
 
     return (
-        <div 
+        <div
             className={`flex flex-col min-w-0 max-w-[85%] sm:max-w-[75%] group 
                 ${isUser ? "self-end items-end" : "self-start items-start"}
             `}
         >
-            {/* The Bubble */}
             <div
                 className={`relative max-w-full overflow-x-auto scrollbar-hide px-5 py-3.5 text-sm md:text-base leading-relaxed shadow-sm transition-colors
                     ${isUser
                         ? "bg-indigo-600 text-white rounded-3xl rounded-tr-sm"
-                        : "text-zinc-900 dark:text-zinc-100" 
+                        : "text-zinc-900 dark:text-zinc-100"
                     }
                 `}
             >
@@ -32,12 +31,21 @@ export default function ChatBubble({ message }) {
                         {message.content}
                     </p>
                 ) : (
-                    <MarkdownRenderer content={message.content} />
+                    // NEW: Conditional rendering for Status vs Content
+                    <>
+                        {message.status && !message.content ? (
+                            <div className="flex items-center gap-2.5 text-zinc-500 dark:text-zinc-400 font-medium py-1">
+                                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                                <span className="animate-pulse">{message.status}</span>
+                            </div>
+                        ) : (
+                            <MarkdownRenderer content={message.content} />
+                        )}
+                    </>
                 )}
             </div>
 
-            {/* Action Bar */}
-            {!isUser && (
+            {!isUser && message.content && (
                 <div className="flex items-center gap-2 mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                     <button
                         onClick={handleCopy}

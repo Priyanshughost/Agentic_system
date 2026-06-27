@@ -1,95 +1,57 @@
-import { useAuthStore } from "../../auth/store/authStore";
+import api from "../../../lib/api";
 
-export const streamChatMessage =
-    async (
-        message,
-        conversationId,
-        onConversationCreated,
-        onChunk
-    ) => {
-        const token =
-            useAuthStore
-                .getState()
-                .token;
-
-        if (!token) {
-            throw new Error(
-                "Not authenticated"
-            );
+export const streamChatMessage = async (
+    message,
+    conversationId,
+    onConversationCreated,
+    onChunk,
+    onStatus,
+    signal
+) => {
+    const response = await api.post(
+        "/chat/message",
+        {
+            message,
+            conversationId,
+        },
+        {
+            responseType: "stream",
+            adapter: "fetch",
+            signal, // NEW: Pass the signal to Axios
         }
+    );
 
-        const response =
-            await fetch(
-                `${import.meta.env.VITE_API_URL}/chat/message`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        message,
-                        conversationId,
-                    }),
-                }
-            );
+    const reader = response.data.getReader();
+    const decoder = new TextDecoder();
 
-        const reader =
-            response.body.getReader();
+    while (true) {
+        const { value, done } = await reader.read();
 
-        const decoder =
-            new TextDecoder();
+        if (done) break;
 
-        while (true) {
-            const {
-                value,
-                done,
-            } = await reader.read();
+        const chunk = decoder.decode(value);
 
-            if (done) break;
+        const lines = chunk
+            .split("\n")
+            .filter((line) => line.startsWith("data:"));
 
-            const chunk =
-                decoder.decode(value);
+        for (const line of lines) {
+            const data = JSON.parse(line.replace("data: ", ""));
 
-            const lines =
-                chunk
-                    .split("\n")
-                    .filter(
-                        (line) =>
-                            line.startsWith(
-                                "data:"
-                            )
-                    );
+            if (data.conversation) {
+                onConversationCreated(data.conversation);
+                continue;
+            }
 
-            for (const line of lines) {
+            if (data.done) {
+                return;
+            }
 
-                const data =
-                    JSON.parse(
-                        line.replace(
-                            "data: ",
-                            ""
-                        )
-                    );
-
-                if (
-                    data.conversation
-                ) {
-                    onConversationCreated(
-                        data.conversation
-                    );
-
-                    continue;
-                }
-
-                if (data.done) {
-                    return;
-                }
-
-                onChunk(
-                    data.content
-                );
+            if (data.type === "status") {
+                onStatus(data.status);
+            } else if (data.type === "content" || data.content) {
+                onChunk(data.content);
             }
         }
-    };
+    }
+};
