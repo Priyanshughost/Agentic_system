@@ -130,4 +130,16 @@ export const useChatStore = create((set) => ({
                     ? []
                     : state.messages,
         })),
+    resetChat: () =>
+        set((state) => {
+            if (state.activeStreamController) {
+                state.activeStreamController.abort();
+            }
+            return {
+                messages: [],
+                conversations: [],
+                activeConversationId: null,
+                activeStreamController: null,
+            };
+        }),
 }));

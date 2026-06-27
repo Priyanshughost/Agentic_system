@@ -17,6 +17,7 @@ import ConversationItem from "./ConversationItem";
 export default function Sidebar({ onClose }) {
     const navigate = useNavigate();
 
+    const resetChat = useChatStore((state) => state.resetChat);
     const loadConversation = useChatStore((state) => state.loadConversation);
     const activeConversationId = useChatStore((state) => state.activeConversationId);
     const conversations = useChatStore((state) => state.conversations);
@@ -57,9 +58,10 @@ export default function Sidebar({ onClose }) {
         } catch (error) {
             console.error("Logout failed:", error);
         } finally {
-            logout();
+            resetChat(); // NEW: Wipe all chat memory completely
+            logout();    // Wipe auth memory
             navigate("/login");
-        }
+        } 
     };
 
     return (
