@@ -8,6 +8,13 @@ export const useChatStore = create((set) => ({
     // NEW: Track the active network stream
     activeStreamController: null,
 
+    isGenerating: false,
+
+    setIsGenerating: (value) =>
+        set({
+            isGenerating: value,
+        }),
+
     setActiveStreamController: (controller) =>
         set({ activeStreamController: controller }),
 
@@ -140,6 +147,7 @@ export const useChatStore = create((set) => ({
                 conversations: [],
                 activeConversationId: null,
                 activeStreamController: null,
+                isGenerating: false,
             };
         }),
 }));

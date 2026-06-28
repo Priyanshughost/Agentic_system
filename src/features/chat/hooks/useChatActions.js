@@ -16,9 +16,14 @@ export const useChatActions = () => {
     const setActiveStreamController = useChatStore((state) => state.setActiveStreamController);
     const abortActiveStream = useChatStore((state) => state.abortActiveStream);
 
+    const setIsGenerating =
+        useChatStore(
+            (state) => state.setIsGenerating
+        );
+
     const sendMessage = async (text) => {
         if (!text.trim()) return;
-
+        setIsGenerating(true);
         abortActiveStream();
 
         const controller = new AbortController();
@@ -61,12 +66,17 @@ export const useChatActions = () => {
                 controller.signal
             );
         } catch (error) {
-            if (error.name === 'AbortError' || error.name === 'CanceledError') {
-                console.log('Stream successfully blocked and aborted.');
+            if (
+                error.name === "AbortError" ||
+                error.name === "CanceledError"
+            ) {
+                updateAssistantStatus("Generation stopped");
+                return;
             } else {
                 console.error("Stream error:", error);
             }
         } finally {
+            setIsGenerating(false);
             if (useChatStore.getState().activeStreamController === controller) {
                 setActiveStreamController(null);
             }

@@ -1,9 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowUp } from "lucide-react"; // ArrowUp is commonly used for modern chat sends
+import { ArrowUp, Square } from "lucide-react";
+import { useChatStore } from "../store/chatStore";
 
 export default function ChatInput({ onSend }) {
     const [value, setValue] = useState("");
     const textareaRef = useRef(null);
+    const isGenerating =
+        useChatStore(
+            (state) => state.isGenerating
+        );
+    const abortActiveStream = useChatStore(
+        (state) => state.abortActiveStream
+    );
 
     // 1. Auto-resize logic: Adjusts height based on content
     useEffect(() => {
@@ -19,6 +27,8 @@ export default function ChatInput({ onSend }) {
     const handleSubmit = (e) => {
         if (e) e.preventDefault();
 
+        if (isGenerating) return;
+
         const trimmedValue = value.trim();
         if (!trimmedValue) return;
 
@@ -32,6 +42,12 @@ export default function ChatInput({ onSend }) {
     };
 
     const handleKeyDown = (e) => {
+
+        if (isGenerating) {
+            e.preventDefault();
+            return;
+        }
+
         // Submit on Enter, allow new line on Shift + Enter
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -40,7 +56,8 @@ export default function ChatInput({ onSend }) {
     };
 
     // Calculate disabled state once
-    const isButtonDisabled = value.trim() === "";
+    const isButtonDisabled =
+        value.trim() === "" || isGenerating;
 
     return (
         <div className="w-full pb-4">
@@ -52,26 +69,45 @@ export default function ChatInput({ onSend }) {
                 <textarea
                     ref={textareaRef}
                     rows={1}
+                    disabled={isGenerating}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Message AI..."
+                    placeholder={
+                        isGenerating
+                            ? "Generating response..."
+                            : "Message AI..."
+                    }
                     aria-label="Chat input"
                     // Tailwind classes: pr-14 prevents text from typing "underneath" the absolute positioned button
                     className="w-full max-h-[200px] py-3 pl-4 pr-14 bg-transparent border-none outline-none resize-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-500 overflow-y-auto scrollbar-thin"
                 />
 
                 <button
-                    type="submit"
-                    disabled={isButtonDisabled}
-                    aria-label="Send message"
-                    // Absolute positioning keeps the button anchored to the bottom right as the textarea grows
-                    className={`absolute right-2.5 bottom-2.5 p-2 rounded-full flex items-center justify-center transition-all duration-200 ${isButtonDisabled
-                            ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
-                            : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:scale-105"
+                    type={isGenerating ? "button" : "submit"}
+                    onClick={() => {
+                        if (isGenerating) {
+                            abortActiveStream();
+                        }
+                    }}
+                    disabled={!isGenerating && value.trim() === ""}
+                    aria-label={
+                        isGenerating
+                            ? "Stop generating"
+                            : "Send message"
+                    }
+                    className={`absolute right-2.5 bottom-2.5 p-2 rounded-full flex items-center justify-center transition-all duration-200 ${isGenerating
+                            ? "bg-red-600 hover:bg-red-700 text-white shadow-md hover:scale-105"
+                            : value.trim() === ""
+                                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
+                                : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:scale-105"
                         }`}
                 >
-                    <ArrowUp className="w-5 h-5 stroke-[2.5]" />
+                    {isGenerating ? (
+                        <Square className="w-4 h-4 fill-current" />
+                    ) : (
+                        <ArrowUp className="w-5 h-5 stroke-[2.5]" />
+                    )}
                 </button>
             </form>
 
