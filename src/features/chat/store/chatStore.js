@@ -63,7 +63,8 @@ export const useChatStore = create((set) => ({
                     id: crypto.randomUUID(),
                     role: "assistant",
                     content: "",
-                    status: "Thinking...", // NEW
+                    statusPath: ["Initializing Request..."], // NEW: track sequence of statuses
+                    agents: null, // NEW: hold agent specifications
                 },
             ],
         })),
@@ -76,7 +77,60 @@ export const useChatStore = create((set) => ({
 
             if (!last || last.role !== "assistant") return state;
 
-            last.status = statusText;
+            if (!last.statusPath.includes(statusText)) {
+                last.statusPath = [...last.statusPath, statusText];
+            }
+            
+            return { messages };
+        }),
+
+    // NEW: set the generated agents
+    setAssistantAgents: (agentsData) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = messages[messages.length - 1];
+
+            if (!last || last.role !== "assistant") return state;
+
+            // Ensure agents have activeAction and thought initialized
+            last.agents = agentsData.map(agent => ({
+                ...agent,
+                activeAction: null,
+                thought: ""
+            }));
+            
+            return { messages };
+        }),
+
+    // NEW: Update agent action
+    updateAgentAction: (agentId, actionText) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = messages[messages.length - 1];
+
+            if (!last || last.role !== "assistant" || !last.agents) return state;
+
+            const agent = last.agents.find(a => a.taskId === agentId);
+            if (agent) {
+                agent.activeAction = actionText;
+            }
+
+            return { messages };
+        }),
+
+    // NEW: Append to agent thought
+    updateAgentThought: (agentId, thoughtChunk) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = messages[messages.length - 1];
+
+            if (!last || last.role !== "assistant" || !last.agents) return state;
+
+            const agent = last.agents.find(a => a.taskId === agentId);
+            if (agent) {
+                agent.thought += thoughtChunk;
+            }
+
             return { messages };
         }),
 
@@ -91,11 +145,6 @@ export const useChatStore = create((set) => ({
             }
 
             last.content += chunk;
-
-            // NEW: The moment actual text arrives, kill the status
-            if (last.status) {
-                last.status = null;
-            }
 
             return { messages };
         }),

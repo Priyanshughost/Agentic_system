@@ -63,6 +63,27 @@ export const useChatActions = () => {
                         updateAssistantStatus(statusText);
                     }
                 },
+                // NEW: Agents callback
+                (agentsArray) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        useChatStore.getState().setAssistantAgents(agentsArray);
+                    }
+                },
+                // NEW: Agent action
+                (agentId, actionText) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        useChatStore.getState().updateAgentAction(agentId, actionText);
+                    }
+                },
+                // NEW: Agent thought
+                (agentId, thoughtChunk) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        useChatStore.getState().updateAgentThought(agentId, thoughtChunk);
+                    }
+                },
                 controller.signal
             );
         } catch (error) {

@@ -65,23 +65,23 @@ export default function Sidebar({ onClose }) {
     };
 
     return (
-        <aside className="flex flex-col h-full w-full bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 font-sans">
+        <aside className="flex flex-col h-full w-full bg-zinc-50 dark:bg-[#09090b] border-r border-zinc-200 dark:border-white/5 text-zinc-900 dark:text-[#e5e5e5] font-sans">
 
             {/* Header Area */}
             <div className="flex items-center justify-between p-4 shrink-0">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-md">
                         <Sparkles className="w-4 h-4" />
                     </div>
-                    <h1 className="font-semibold text-[15px] tracking-tight">
-                        AI Assistant
+                    <h1 className="font-heading font-semibold text-base tracking-wide">
+                        Nexus AI
                     </h1>
                 </div>
 
                 {/* Mobile Close Button */}
                 <button
                     onClick={onClose}
-                    className="p-1.5 rounded-md lg:hidden hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 transition-colors"
+                    className="p-1.5 rounded-md lg:hidden hover:bg-zinc-200 dark:hover:bg-white/5 text-zinc-500 transition-colors"
                     aria-label="Close sidebar"
                 >
                     <X className="w-5 h-5" />
@@ -90,7 +90,7 @@ export default function Sidebar({ onClose }) {
 
             {/* Primary Action */}
             <div className="px-3 pb-3 shrink-0">
-                <button onClick={handleNewChat} className="flex items-center gap-2 w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm group">
+                <button onClick={handleNewChat} className="flex items-center gap-2 w-full rounded-xl bg-white dark:bg-[#111] border border-zinc-200 dark:border-white/10 p-2.5 text-[14px] font-medium hover:bg-zinc-100 dark:hover:bg-white/5 transition-all shadow-sm group">
                     <Plus className="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
                     New Chat
                 </button>
@@ -98,7 +98,7 @@ export default function Sidebar({ onClose }) {
 
             {/* Scrollable Chat History */}
             <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-thin">
-                <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 px-2 uppercase tracking-wider">
+                <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 mb-2 px-2 uppercase tracking-widest">
                     Recent
                 </div>
                 <div className="space-y-0.5 flex flex-col">
@@ -113,28 +113,31 @@ export default function Sidebar({ onClose }) {
             </div>
 
             {/* Sticky Footer - User Profile & Logout */}
-            <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 shrink-0">
-                <div className="flex items-center justify-between w-full rounded-xl p-2 bg-transparent hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-colors">
+            <div className="p-3 border-t border-zinc-200 dark:border-white/5 shrink-0">
+                <div className="flex items-center justify-between w-full rounded-xl p-2 bg-transparent hover:bg-zinc-200/50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
 
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-semibold shadow-inner">
+                        <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white text-sm font-semibold shadow-inner">
                             {user?.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
 
-                        <div className="flex flex-col items-start text-sm min-w-0 pr-2">
-                            <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate w-full">
+                        <div className="flex flex-col items-start min-w-0 pr-2">
+                            <span className="text-[14px] font-medium text-zinc-900 dark:text-[#e5e5e5] truncate w-full group-hover:text-indigo-500 transition-colors">
                                 {user?.name || "User"}
                             </span>
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate w-full">
+                            <span className="text-[11px] text-zinc-500 dark:text-zinc-500 truncate w-full">
                                 {user?.email || "No email provided"}
                             </span>
                         </div>
                     </div>
 
                     <button
-                        onClick={handleLogout}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleLogout();
+                        }}
                         title="Logout"
-                        className="p-2 shrink-0 rounded-lg text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                        className="p-2 shrink-0 rounded-lg text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                     >
                         <LogOut className="w-4 h-4" />
                     </button>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Copy, Check, Loader2 } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
+import AgentOverview from "./AgentOverview";
+import ExecutionPath from "./ExecutionPath";
 
 export default function ChatBubble({ message }) {
     const isUser = message.role === "user";
@@ -19,10 +21,10 @@ export default function ChatBubble({ message }) {
             `}
         >
             <div
-                className={`relative max-w-full overflow-x-auto scrollbar-hide px-5 py-3.5 text-sm md:text-base leading-relaxed shadow-sm transition-colors
+                className={`relative max-w-full overflow-x-auto scrollbar-hide px-5 py-4 text-[15px] md:text-base transition-colors
                     ${isUser
-                        ? "bg-indigo-600 text-white rounded-3xl rounded-tr-sm"
-                        : "text-zinc-900 dark:text-zinc-100"
+                        ? "bg-linear-to-br from-indigo-500 to-violet-600 text-white rounded-[24px] rounded-tr-[4px] shadow-lg shadow-indigo-500/20 font-medium leading-relaxed"
+                        : "text-zinc-900 dark:text-[#e5e5e5] leading-loose tracking-wide w-full"
                     }
                 `}
             >
@@ -31,17 +33,11 @@ export default function ChatBubble({ message }) {
                         {message.content}
                     </p>
                 ) : (
-                    // NEW: Conditional rendering for Status vs Content
-                    <>
-                        {message.status && !message.content ? (
-                            <div className="flex items-center gap-2.5 text-zinc-500 dark:text-zinc-400 font-medium py-1">
-                                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-                                <span className="animate-pulse">{message.status}</span>
-                            </div>
-                        ) : (
-                            <MarkdownRenderer content={message.content} />
-                        )}
-                    </>
+                    <div className="flex flex-col w-full">
+                        <ExecutionPath statusPath={message.statusPath} />
+                        <AgentOverview agents={message.agents} />
+                        <MarkdownRenderer content={message.content} />
+                    </div>
                 )}
             </div>
 

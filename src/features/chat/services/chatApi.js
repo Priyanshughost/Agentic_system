@@ -6,6 +6,9 @@ export const streamChatMessage = async (
     onConversationCreated,
     onChunk,
     onStatus,
+    onAgents,
+    onAgentAction,
+    onAgentThought,
     signal
 ) => {
     const response = await api.post(
@@ -49,6 +52,12 @@ export const streamChatMessage = async (
 
             if (data.type === "status") {
                 onStatus(data.status);
+            } else if (data.type === "agents") {
+                onAgents(data.agents);
+            } else if (data.type === "agent_action") {
+                onAgentAction(data.agentId, data.action);
+            } else if (data.type === "agent_thought") {
+                onAgentThought(data.agentId, data.content);
             } else if (data.type === "content" || data.content) {
                 onChunk(data.content);
             }
