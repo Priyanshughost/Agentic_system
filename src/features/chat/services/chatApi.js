@@ -9,6 +9,8 @@ export const streamChatMessage = async (
     onAgents,
     onAgentAction,
     onAgentThought,
+    onAgentThinking,
+    onAgentRetry,
     signal
 ) => {
     const response = await api.post(
@@ -58,6 +60,10 @@ export const streamChatMessage = async (
                 onAgentAction(data.agentId, data.action);
             } else if (data.type === "agent_thought") {
                 onAgentThought(data.agentId, data.content);
+            } else if (data.type === "agent_thinking") {
+                onAgentThinking(data.agentId, data.isThinking);
+            } else if (data.type === "agent_retry") {
+                onAgentRetry(data.agentId, data.message);
             } else if (data.type === "content" || data.content) {
                 onChunk(data.content);
             }

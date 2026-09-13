@@ -84,6 +84,20 @@ export const useChatActions = () => {
                         useChatStore.getState().updateAgentThought(agentId, thoughtChunk);
                     }
                 },
+                // NEW: Agent thinking
+                (agentId, isThinking) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        useChatStore.getState().setAgentThinking(agentId, isThinking);
+                    }
+                },
+                // NEW: Agent retry
+                (agentId, retryMessage) => {
+                    const currentlyActiveId = useChatStore.getState().activeConversationId;
+                    if (thisStreamConversationId === currentlyActiveId) {
+                        useChatStore.getState().setAgentRetry(agentId, retryMessage);
+                    }
+                },
                 controller.signal
             );
         } catch (error) {

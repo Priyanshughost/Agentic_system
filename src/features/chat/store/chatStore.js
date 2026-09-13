@@ -96,7 +96,10 @@ export const useChatStore = create((set) => ({
             last.agents = agentsData.map(agent => ({
                 ...agent,
                 activeAction: null,
-                thought: ""
+                thought: "",
+                isThinking: false,
+                isRetrying: false,
+                retryMessage: null
             }));
             
             return { messages };
@@ -106,14 +109,16 @@ export const useChatStore = create((set) => ({
     updateAgentAction: (agentId, actionText) =>
         set((state) => {
             const messages = [...state.messages];
-            const last = messages[messages.length - 1];
+            const last = { ...messages[messages.length - 1] };
 
             if (!last || last.role !== "assistant" || !last.agents) return state;
 
-            const agent = last.agents.find(a => a.taskId === agentId);
-            if (agent) {
-                agent.activeAction = actionText;
-            }
+            last.agents = last.agents.map(a =>
+                a.taskId === agentId
+                    ? { ...a, activeAction: actionText }
+                    : a
+            );
+            messages[messages.length - 1] = last;
 
             return { messages };
         }),
@@ -122,14 +127,52 @@ export const useChatStore = create((set) => ({
     updateAgentThought: (agentId, thoughtChunk) =>
         set((state) => {
             const messages = [...state.messages];
-            const last = messages[messages.length - 1];
+            const last = { ...messages[messages.length - 1] };
 
             if (!last || last.role !== "assistant" || !last.agents) return state;
 
-            const agent = last.agents.find(a => a.taskId === agentId);
-            if (agent) {
-                agent.thought += thoughtChunk;
-            }
+            last.agents = last.agents.map(a =>
+                a.taskId === agentId
+                    ? { ...a, thought: a.thought + thoughtChunk, isRetrying: false }
+                    : a
+            );
+            messages[messages.length - 1] = last;
+
+            return { messages };
+        }),
+
+    // NEW: Set agent thinking state
+    setAgentThinking: (agentId, isThinking) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = { ...messages[messages.length - 1] };
+
+            if (!last || last.role !== "assistant" || !last.agents) return state;
+
+            last.agents = last.agents.map(a =>
+                a.taskId === agentId
+                    ? { ...a, isThinking, isRetrying: false }
+                    : a
+            );
+            messages[messages.length - 1] = last;
+
+            return { messages };
+        }),
+
+    // NEW: Set agent retry state
+    setAgentRetry: (agentId, retryMessage) =>
+        set((state) => {
+            const messages = [...state.messages];
+            const last = { ...messages[messages.length - 1] };
+
+            if (!last || last.role !== "assistant" || !last.agents) return state;
+
+            last.agents = last.agents.map(a =>
+                a.taskId === agentId
+                    ? { ...a, isRetrying: true, retryMessage, isThinking: false }
+                    : a
+            );
+            messages[messages.length - 1] = last;
 
             return { messages };
         }),
